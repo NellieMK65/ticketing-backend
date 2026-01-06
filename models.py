@@ -1,5 +1,6 @@
 from sqlalchemy import MetaData
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy_serializer import SerializerMixin
 
 naming_convention = {
     "ix": "ix_%(column_0_label)s",
@@ -15,7 +16,7 @@ db = SQLAlchemy(metadata=metadata)
 
 
 # model the tables
-class User(db.Model):
+class User(db.Model, SerializerMixin):
     __tablename__ = "users"
 
     id = db.Column(db.Integer(), primary_key=True)
@@ -26,6 +27,18 @@ class User(db.Model):
     # password_hash = db.Column(db.Text(), nullable=False)
     created_at = db.Column(db.DateTime(), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(), onupdate=db.func.now())
+
+    # serializer rules
+    serialize_rules = ("-updated_at",)
+
+    # manual serialization
+    def to_json(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "phone": self.phone
+        }
+
 
 
 class Category(db.Model):
