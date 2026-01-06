@@ -28,8 +28,8 @@ class User(db.Model, SerializerMixin):
     created_at = db.Column(db.DateTime(), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(), onupdate=db.func.now())
 
-    # serializer rules
-    serialize_rules = ("-updated_at",)
+    # serializer rules (these are used to negate specific properties)
+    # serialize_rules = ("-updated_at",)
 
     # manual serialization
     def to_json(self):
@@ -41,7 +41,7 @@ class User(db.Model, SerializerMixin):
 
 
 
-class Category(db.Model):
+class Category(db.Model, SerializerMixin):
     __tablename__ = "categories"
 
     id = db.Column(db.Integer(), primary_key=True)
@@ -53,7 +53,7 @@ class Category(db.Model):
     events = db.relationship("Event", back_populates="category")  # 1:*
 
 
-class Event(db.Model):
+class Event(db.Model, SerializerMixin):
     __tablename__ = "events"
 
     id = db.Column(db.Integer(), primary_key=True)
@@ -80,7 +80,7 @@ class Event(db.Model):
 
     tickets = db.relationship("Ticket", back_populates="event")
 
-class Ticket(db.Model):
+class Ticket(db.Model, SerializerMixin):
     __tablename__ = "tickets"
 
     id = db.Column(db.Integer(), primary_key=True)
@@ -96,7 +96,7 @@ class Ticket(db.Model):
     payments = db.relationship("Payment", back_populates="ticket")
 
 
-class Payment(db.Model):
+class Payment(db.Model, SerializerMixin):
     __tablename__ = "payments"
 
     id = db.Column(db.Integer(), primary_key=True)

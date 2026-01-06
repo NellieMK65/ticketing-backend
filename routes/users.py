@@ -11,7 +11,8 @@ class UserResource(Resource):
         print(data)
 
         for user in data:
-            result.append(user.to_dict())
+            # result.append(user.to_dict(rules=("-updated_at", "-created_at")))
+            result.append(user.to_dict(only=("id", "name")))
 
         print(result)
 
