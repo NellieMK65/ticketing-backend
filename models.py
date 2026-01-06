@@ -1,6 +1,10 @@
 from sqlalchemy import MetaData
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_serializer import SerializerMixin
+from sqlalchemy.orm import validates
+import phonenumbers
+import re
+from datetime import datetime
 
 naming_convention = {
     "ix": "ix_%(column_0_label)s",
@@ -14,6 +18,15 @@ metadata = MetaData(naming_convention=naming_convention)
 # 2. create an instance of flask sqlalchemy and connect it to sqlalchemy
 db = SQLAlchemy(metadata=metadata)
 
+"""
+Validations
+-> Data Integrity - correctness of the data
+
+-> We have frontend validation using tools like zod, yup
+-> In the backend we will also add validations at the model level and controller(routes) level
+-> In the database layer, we leverage db constraints (not null, unique, and other custom ones)
+
+"""
 
 # model the tables
 class User(db.Model, SerializerMixin):
@@ -31,14 +44,37 @@ class User(db.Model, SerializerMixin):
     # serializer rules (these are used to negate specific properties)
     # serialize_rules = ("-updated_at",)
 
+    @validates("email")
+    def validate_email(self, key, email):
+        if '@' not in email:
+            raise ValueError("Please provide a valid email")
+        return email
+
+    @validates("phone")
+    def validate_phone(self, key, phone):
+        # this supports only kenyan numbers
+        # if len(phone) < 10 or len(phone) > 10: #07 or 01
+        #     raise ValueError("Invalid phone number, can only contain 10 digits")
+        # return phone
+
+        # for kenyan numbers with the phone extension
+        # if not re.match("^\+2547\d{8}$") or not re.match("^\+2541\d{8}$"):
+        #     raise ValueError("Invalid kenyan phone number, must start with +254")
+
+        # this supports global phone numbers
+        parsed = phonenumbers.parse(phone, None) # +
+        is_valid = phonenumbers.is_valid_number(parsed)
+
+        if not is_valid:
+            raise ValueError("Enter a valid phone number")
+        elif "+" not in phone:
+            raise ValueError("Must contain plus")
+
+        return phone
+
     # manual serialization
     def to_json(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "phone": self.phone
-        }
-
+        return {"id": self.id, "name": self.name, "phone": self.phone}
 
 
 class Category(db.Model, SerializerMixin):
@@ -80,6 +116,17 @@ class Event(db.Model, SerializerMixin):
 
     tickets = db.relationship("Ticket", back_populates="event")
 
+    @validates("start_date")
+    def validate_start_date(self, key, date):
+        d1 = datetime.strptime(date, "%Y-%m-%d")
+        now = datetime.date()
+
+        if d1 < now:
+            raise ValueError("Start date has to be of a future date")
+        return date
+
+
+
 class Ticket(db.Model, SerializerMixin):
     __tablename__ = "tickets"
 
@@ -109,4 +156,3 @@ class Payment(db.Model, SerializerMixin):
 
     # relationships
     ticket = db.relationship("Ticket", back_populates="payments", uselist=False)
-
