@@ -9,7 +9,7 @@ app = Flask(__name__)
 api = Api(app)
 
 # provide database config
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tickets.db'
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///tickets.db"
 
 # create a migration object to manage migrations
 migrate = Migrate(app, db)

@@ -2,16 +2,17 @@ from sqlalchemy import MetaData
 from flask_sqlalchemy import SQLAlchemy
 
 naming_convention = {
-    "ix": 'ix_%(column_0_label)s',
+    "ix": "ix_%(column_0_label)s",
     "uq": "uq_%(table_name)s_%(column_0_name)s",
     "ck": "ck_%(table_name)s_%(constraint_name)s",
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
-    "pk": "pk_%(table_name)s"
+    "pk": "pk_%(table_name)s",
 }
 metadata = MetaData(naming_convention=naming_convention)
 
 # 2. create an instance of flask sqlalchemy and connect it to sqlalchemy
 db = SQLAlchemy(metadata=metadata)
+
 
 # model the tables
 class User(db.Model):
@@ -26,6 +27,7 @@ class User(db.Model):
     created_at = db.Column(db.DateTime(), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(), onupdate=db.func.now())
 
+
 class Category(db.Model):
     __tablename__ = "categories"
 
@@ -33,6 +35,10 @@ class Category(db.Model):
     name = db.Column(db.Integer(), nullable=False, unique=True)
     created_at = db.Column(db.DateTime(), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(), onupdate=db.func.now())
+
+    # define relationships
+    events = db.relationship("Event", back_populates="category")  # 1:*
+
 
 class Event(db.Model):
     __tablename__ = "events"
@@ -42,12 +48,24 @@ class Event(db.Model):
     description = db.Column(db.Text(), nullable=False)
     venue = db.Column(db.Text(), nullable=False)
     poster = db.Column(db.Text(), nullable=False)
-    status = db.Column(db.Enum("cancelled", "postponed", "cancelled", "active", "completed"), default="active")
-    category_id = db.Column(db.Integer(), db.ForeignKey("categories.id"), nullable=False)
+    status = db.Column(
+        db.Enum("cancelled", "postponed", "cancelled", "active", "completed"),
+        default="active",
+    )
+    category_id = db.Column(
+        db.Integer(), db.ForeignKey("categories.id"), nullable=False
+    )
     start_date = db.Column(db.DateTime(), nullable=False)
     end_date = db.Column(db.DateTime(), nullable=False)
     created_at = db.Column(db.DateTime(), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(), onupdate=db.func.now())
+
+    # define the relationships
+    category = db.relationship(
+        "Category", back_populates="events", uselist=False
+    )  # *:1
+
+    tickets = db.relationship("Ticket", back_populates="event")
 
 class Ticket(db.Model):
     __tablename__ = "tickets"
@@ -60,6 +78,11 @@ class Ticket(db.Model):
     created_at = db.Column(db.DateTime(), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(), onupdate=db.func.now())
 
+    # relationships
+    event = db.relationship("Event", back_populates="tickets", uselist=False)
+    payments = db.relationship("Payment", back_populates="ticket")
+
+
 class Payment(db.Model):
     __tablename__ = "payments"
 
@@ -70,3 +93,7 @@ class Payment(db.Model):
     quantity = db.Column(db.Integer(), nullable=False)
     created_at = db.Column(db.DateTime(), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(), onupdate=db.func.now())
+
+    # relationships
+    ticket = db.relationship("Ticket", back_populates="payments", uselist=False)
+

@@ -6,30 +6,36 @@ from flask_restful import Resource
 
 app = Flask(__name__)
 
+
 # todo crud
-@app.get('/todos')
+@app.get("/todos")
 def get_todos():
     return []
+
 
 @app.get("/todos/<int:id>")
 def get_todo():
     return {}
 
+
 @app.post("/todos")
 def create_todo():
     return {"message": "created"}
+
 
 @app.patch("/todos/<int:id>")
 def update_todo():
     return {"message": "updated"}
 
+
 @app.delete("/todos/<int:id>")
 def delete_todo():
     return {"message": "deleted"}
 
+
 class Todo(Resource):
     # create instance methods using http verbs as names
-    def get(self, id = None):
+    def get(self, id=None):
         if id is None:
             return []
         else:
@@ -43,6 +49,7 @@ class Todo(Resource):
 
     def delete(self, id):
         return {"message": "deleted"}
+
 
 # O.O.P -> Object Oriented Programming -> blueprint of how objects are created
 # inheritance, polymorphism, abstraction, encapsulation
