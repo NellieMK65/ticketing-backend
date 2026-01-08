@@ -37,7 +37,7 @@ class User(db.Model, SerializerMixin):
     phone = db.Column(db.Text(), nullable=False, unique=True)
     email = db.Column(db.Text(), nullable=False, unique=True)
     role = db.Column(db.Enum("admin", "user"), default="user", nullable=False)
-    # password_hash = db.Column(db.Text(), nullable=False)
+    password = db.Column(db.Text(), nullable=True)
     created_at = db.Column(db.DateTime(), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(), onupdate=db.func.now(), default=datetime.now())
 
