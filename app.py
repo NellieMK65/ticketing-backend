@@ -2,7 +2,7 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_restful import Api
 from models import db
-from routes.users import UserResource
+from routes.users import UserResource, UserSignup
 
 app = Flask(__name__)
 
@@ -21,3 +21,4 @@ migrate = Migrate(app, db)
 db.init_app(app)
 
 api.add_resource(UserResource, "/users")
+api.add_resource(UserSignup, "/sign-up")
