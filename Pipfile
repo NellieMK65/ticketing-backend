@@ -12,6 +12,9 @@ flask-restful = "*"
 ruff = "*"
 sqlalchemy-serializer = "*"
 phonenumbers = "*"
+flask-bcrypt = "*"
+flask-jwt-extended = "*"
+dotenv = "*"
 
 [dev-packages]
 
