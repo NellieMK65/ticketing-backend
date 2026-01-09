@@ -28,6 +28,7 @@ Validations
 
 """
 
+
 # model the tables
 class User(db.Model, SerializerMixin):
     __tablename__ = "users"
@@ -39,14 +40,16 @@ class User(db.Model, SerializerMixin):
     role = db.Column(db.Enum("admin", "user"), default="user", nullable=False)
     password = db.Column(db.Text(), nullable=True)
     created_at = db.Column(db.DateTime(), server_default=db.func.now())
-    updated_at = db.Column(db.DateTime(), onupdate=db.func.now(), default=datetime.now())
+    updated_at = db.Column(
+        db.DateTime(), onupdate=db.func.now(), default=datetime.now()
+    )
 
     # serializer rules (these are used to negate specific properties)
     serialize_rules = ("-password",)
 
     @validates("email")
     def validate_email(self, key, email):
-        if '@' not in email:
+        if "@" not in email:
             raise ValueError("Please provide a valid email")
         return email
 
@@ -62,7 +65,7 @@ class User(db.Model, SerializerMixin):
         #     raise ValueError("Invalid kenyan phone number, must start with +254")
 
         # this supports global phone numbers
-        parsed = phonenumbers.parse(phone, None) # +
+        parsed = phonenumbers.parse(phone, None)  # +
         is_valid = phonenumbers.is_valid_number(parsed)
 
         if not is_valid:
@@ -132,7 +135,6 @@ class Event(db.Model, SerializerMixin):
         if d1 < now:
             raise ValueError("Start date has to be of a future date")
         return date
-
 
 
 class Ticket(db.Model, SerializerMixin):

@@ -1,10 +1,18 @@
+import os
+
 from flask import Flask
 from flask_migrate import Migrate
 from flask_restful import Api
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
+from dotenv import load_dotenv
+
 from models import db
 from routes.users import UserResource, UserSignup, LoginResource
+
+# load the environment variables from our .env file
+# and makes them available to our application
+load_dotenv()
 
 app = Flask(__name__)
 
@@ -19,6 +27,9 @@ jwt = JWTManager(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///tickets.db"
 # enable query logging
 app.config["SQLALCHEMY_ECHO"] = True
+
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
+# app.config["JWT_ACCESS_TOKEN_EXPIRES"] =
 
 # create a migration object to manage migrations
 migrate = Migrate(app, db)
