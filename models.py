@@ -42,7 +42,7 @@ class User(db.Model, SerializerMixin):
     updated_at = db.Column(db.DateTime(), onupdate=db.func.now(), default=datetime.now())
 
     # serializer rules (these are used to negate specific properties)
-    # serialize_rules = ("-updated_at",)
+    serialize_rules = ("-password",)
 
     @validates("email")
     def validate_email(self, key, email):
@@ -75,6 +75,14 @@ class User(db.Model, SerializerMixin):
     # manual serialization
     def to_json(self):
         return {"id": self.id, "name": self.name, "phone": self.phone}
+
+    @validates("password")
+    def validate_password(self, key, password):
+        # use regex to check if password is strong i.e has characters, numbers, and special symbols
+
+        if len(password) < 3:
+            raise ValueError("Password is too short")
+        return password
 
 
 class Category(db.Model, SerializerMixin):

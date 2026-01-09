@@ -3,6 +3,7 @@ from flask_restful import Resource, reqparse
 from models import User, db
 import phonenumbers
 from sqlalchemy.exc import IntegrityError
+from flask_bcrypt import generate_password_hash, check_password_hash
 
 
 class UserResource(Resource):
@@ -25,7 +26,16 @@ signup_parser = reqparse.RequestParser()
 signup_parser.add_argument("name", required=True, type=str, help="User name is required")
 signup_parser.add_argument("phone", required=True, type=str, help="Phone number is required")
 signup_parser.add_argument("email", required=True, type=str, help="Email address is required")
+signup_parser.add_argument("password", required=True, type=str, help="Password is required")
 
+
+"""
+For security reasons, look into supporting the following
+    1. Oauth
+    2. 2fa (especially if using password auth)
+    3. Passwordless auth -> provide an email where will a link that will automatically login in the user
+    4. Rate limiting (i.e 3 attempts to login the disable the account temporarily)
+"""
 class UserSignup(Resource):
     def post(self):
         try:
@@ -43,12 +53,21 @@ class UserSignup(Resource):
             if phone:
                 return {"message": "Phone number already taken"}, 422
 
+            pw_hash = generate_password_hash(data['password']).decode("utf-8")
+
             # handover to sqlalchemy
-            user = User(
-                name=data['name'],
-                phone=data['phone'],
-                email=data['email']
-            )
+            # user = User(
+            #     name=data['name'],
+            #     phone=data['phone'],
+            #     email=data['email']
+            # )
+
+
+            # delete the plain text password
+            del data['password']
+
+            # keyword arguments unpacking (short cut to what is btwn line 50 to 55)
+            user = User(**data, password=pw_hash)
 
             db.session.add(user)
             db.session.commit()
@@ -61,3 +80,26 @@ class UserSignup(Resource):
         except IntegrityError as e:
             print(str(e))
             return {"message": "Missing Values", "error": "IntegrityError"}, 422
+
+
+login_parser = reqparse.RequestParser()
+login_parser.add_argument("email", required=True, type=str,help="Email address is required")
+login_parser.add_argument("password", required=True, type=str,help="Password is required")
+
+class LoginResource(Resource):
+    def post(self):
+        data = login_parser.parse_args()
+
+        # 1. check if user with email exists
+        exists = User.query.filter(User.email == data['email']).first()
+
+        if exists is None:
+            return {"message": "Invalid credentials or Invalid email or password"}, 401
+
+        # 2. validate the password
+        is_valid_password = check_password_hash(exists.password, data['password'])
+
+        if not is_valid_password:
+            return {"message": "Invalid email or password"}, 401
+
+        return {"message": "Login successful", "data": exists.to_dict()}
