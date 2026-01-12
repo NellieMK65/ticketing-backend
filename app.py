@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_restful import Api
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 from dotenv import load_dotenv
 
 from models import db
@@ -22,6 +23,10 @@ api = Api(app)
 bcrypt = Bcrypt(app)
 # link flask + flask-jwt-extended
 jwt = JWTManager(app)
+# link cors + flask
+CORS(
+    app
+)
 
 # provide database config
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///tickets.db"

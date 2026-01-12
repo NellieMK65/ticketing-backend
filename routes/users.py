@@ -11,7 +11,7 @@ class UserResource(Resource):
     @jwt_required()
     def get(self):
         print("JWT", get_jwt())
-        role = get_jwt()['role']
+        role = get_jwt()["role"]
 
         # if role != 'admin':
         #     return {"message": "Unauthorized request"}, 401
