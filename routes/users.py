@@ -117,7 +117,10 @@ class LoginResource(Resource):
         exists = User.query.filter(User.email == data["email"]).first()
 
         if exists is None:
-            return {"message": "Invalid credentials or Invalid email or password"}, 401
+            return {"message": "Invalid email or password"}, 401
+
+        # generate otp and send to provided email (should have a route that validates the sent otp)
+        # use magic links (generate a random unique link and send it to the provided email), once the user clicks on the link, we log them in automatically
 
         # 2. validate the password
         is_valid_password = check_password_hash(exists.password, data["password"])
