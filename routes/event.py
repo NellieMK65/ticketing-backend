@@ -45,11 +45,11 @@ class EventResource(Resource):
             results = []
             for event in events:
                 results.append(
-                    event.to_dict(rules=("-tickets.event", "-tickets.payments"))
+                    event.to_dict(rules=("-tickets.event", "-tickets.payment_items"))
                 )
 
             return results
 
         event = Event.query.filter(Event.id == id).first()
 
-        return event.to_dict(rules=("-tickets.event", "-tickets.payments"))
+        return event.to_dict(rules=("-tickets.event", "-tickets.payment_items"))
