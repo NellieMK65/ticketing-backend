@@ -156,19 +156,43 @@ class Ticket(db.Model, SerializerMixin):
 
     # relationships
     event = db.relationship("Event", back_populates="tickets", uselist=False)
-    payments = db.relationship("Payment", back_populates="ticket")
+    payment_items = db.relationship("PaymentItem", back_populates="ticket")
 
 
 class Payment(db.Model, SerializerMixin):
+    """
+    Represents a single M-Pesa transaction that can include multiple ticket types.
+    One payment = one checkout transaction = one M-Pesa code
+    """
     __tablename__ = "payments"
 
     id = db.Column(db.Integer(), primary_key=True)
     mpesa_code = db.Column(db.Text())
     user_id = db.Column(db.Integer(), db.ForeignKey("users.id"), nullable=False)
-    ticket_id = db.Column(db.Integer(), db.ForeignKey("tickets.id"), nullable=False)
-    quantity = db.Column(db.Integer(), nullable=False)
     created_at = db.Column(db.DateTime(), server_default=db.func.now())
     updated_at = db.Column(db.DateTime(), onupdate=db.func.now())
 
     # relationships
-    ticket = db.relationship("Ticket", back_populates="payments", uselist=False)
+    items = db.relationship("PaymentItem", back_populates="payment")
+
+
+class PaymentItem(db.Model, SerializerMixin):
+    """
+    Represents an individual ticket line item within a payment.
+    Each PaymentItem tracks a specific ticket type and quantity purchased.
+    A Payment can have multiple PaymentItems (one for each ticket type in the cart).
+    """
+    __tablename__ = "payment_items"
+
+    id = db.Column(db.Integer(), primary_key=True)
+    payment_id = db.Column(db.Integer(), db.ForeignKey("payments.id"), nullable=False)
+    ticket_id = db.Column(db.Integer(), db.ForeignKey("tickets.id"), nullable=False)
+    quantity = db.Column(db.Integer(), nullable=False)
+    # Store price at time of purchase (in case ticket price changes later)
+    unit_price = db.Column(db.Integer(), nullable=False)
+    created_at = db.Column(db.DateTime(), server_default=db.func.now())
+    updated_at = db.Column(db.DateTime(), onupdate=db.func.now())
+
+    # relationships
+    payment = db.relationship("Payment", back_populates="items", uselist=False)
+    ticket = db.relationship("Ticket", back_populates="payment_items", uselist=False)

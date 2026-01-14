@@ -1,4 +1,5 @@
 from flask_restful import Resource, reqparse
+from flask import request
 from models import Event, db
 
 parser = reqparse.RequestParser()
@@ -26,10 +27,22 @@ class EventResource(Resource):
 
     def get(self, id=None):
         if id is None:
+            # Check if 'ids' query parameter is provided for batch fetching
+            # Example: /events?ids=1,2,3 or /events?ids=[1,2,3]
+            ids_param = request.args.get("ids")
+
+            if ids_param:
+                # Parse the ids parameter - supports both "1,2,3" and "[1,2,3]" formats
+                ids_param = ids_param.strip("[]")
+                event_ids = [int(id.strip()) for id in ids_param.split(",") if id.strip()]
+
+                # Fetch only events matching the provided IDs
+                events = Event.query.filter(Event.id.in_(event_ids)).all()
+            else:
+                # Fetch all events if no ids parameter provided
+                events = Event.query.all()
+
             results = []
-
-            events = Event.query.all()
-
             for event in events:
                 results.append(
                     event.to_dict(rules=("-tickets.event", "-tickets.payments"))
