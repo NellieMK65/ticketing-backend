@@ -8,10 +8,10 @@ from flask_jwt_extended import create_access_token, jwt_required, get_jwt
 
 
 class UserResource(Resource):
-    @jwt_required()
+    # @jwt_required()
     def get(self):
-        print("JWT", get_jwt())
-        role = get_jwt()["role"]
+        # print("JWT", get_jwt())
+        # role = get_jwt()["role"]
 
         # if role != 'admin':
         #     return {"message": "Unauthorized request"}, 401
@@ -24,7 +24,8 @@ class UserResource(Resource):
 
         for user in data:
             # result.append(user.to_dict(rules=("-updated_at", "-created_at")))
-            result.append(user.to_dict(only=("id", "name")))
+            # result.append(user.to_dict(only=("id", "name")))
+            result.append(user.to_dict())
 
         print(result)
 

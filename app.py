@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 from models import db
 from routes.users import UserResource, UserSignup, LoginResource
+from routes.category import CategoryResource
 
 # load the environment variables from our .env file
 # and makes them available to our application
@@ -45,3 +46,4 @@ db.init_app(app)
 api.add_resource(UserResource, "/users")
 api.add_resource(UserSignup, "/sign-up")
 api.add_resource(LoginResource, "/login")
+api.add_resource(CategoryResource, "/categories")
