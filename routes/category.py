@@ -1,15 +1,17 @@
 from flask_restful import Resource, reqparse
-from models import Category, db
+from sqlalchemy import func
+from models import Category, Event, db
 
 parser = reqparse.RequestParser()
-parser.add_argument("name", type=str, required=True,help="Category name is required")
+parser.add_argument("name", type=str, required=True, help="Category name is required")
+
 
 class CategoryResource(Resource):
     def post(self):
         data = parser.parse_args()
 
         # We check name is not taken
-        exists = Category.query.filter(Category.name == data['name']).first()
+        exists = Category.query.filter(Category.name == data["name"]).first()
 
         if exists is not None:
             return {"message": "Category exists"}, 422
@@ -25,11 +27,16 @@ class CategoryResource(Resource):
     def get(self):
         results = []
 
-        categories = Category.query.all()
+        categories = (
+            db.session.query(Category, func.count(Event.id).label("event_count"))
+            .outerjoin(Event)
+            .group_by(Category.id)
+            .all()
+        )
 
-        for category in categories:
-            results.append(category.to_dict())
+        for category, count in categories:
+            data = category.to_dict()
+            data["event_count"] = count
+            results.append(data)
 
         return results
-
-

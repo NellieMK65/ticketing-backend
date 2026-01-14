@@ -111,7 +111,7 @@ class Event(db.Model, SerializerMixin):
     venue = db.Column(db.Text(), nullable=False)
     poster = db.Column(db.Text(), nullable=False)
     status = db.Column(
-        db.Enum("cancelled", "postponed", "cancelled", "active", "completed"),
+        db.Enum("cancelled", "postponed", "active", "completed"),
         default="active",
     )
     category_id = db.Column(
@@ -131,12 +131,16 @@ class Event(db.Model, SerializerMixin):
 
     @validates("start_date")
     def validate_start_date(self, key, date):
-        d1 = datetime.strptime(date, "%Y-%m-%d")
-        now = datetime.date()
+        # d1 = datetime.strptime(date, "%Y-%m-%d")
+        # now = datetime.date()
 
-        if d1 < now:
-            raise ValueError("Start date has to be of a future date")
-        return date
+        # if d1 < now:
+        #     raise ValueError("Start date has to be of a future date")
+        return datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
+
+    @validates("end_date")
+    def validate_end_date(self, key, date):
+        return datetime.strptime(date, "%Y-%m-%dT%H:%M:%SZ")
 
 
 class Ticket(db.Model, SerializerMixin):

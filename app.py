@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 from models import db
 from routes.users import UserResource, UserSignup, LoginResource
 from routes.category import CategoryResource
+from routes.event import EventResource
+from routes.ticket import TicketResource
 
 # load the environment variables from our .env file
 # and makes them available to our application
@@ -25,9 +27,7 @@ bcrypt = Bcrypt(app)
 # link flask + flask-jwt-extended
 jwt = JWTManager(app)
 # link cors + flask
-CORS(
-    app
-)
+CORS(app)
 
 # provide database config
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///tickets.db"
@@ -47,3 +47,5 @@ api.add_resource(UserResource, "/users")
 api.add_resource(UserSignup, "/sign-up")
 api.add_resource(LoginResource, "/login")
 api.add_resource(CategoryResource, "/categories")
+api.add_resource(EventResource, "/events", "/events/<int:id>")
+api.add_resource(TicketResource, "/tickets")
