@@ -14,7 +14,7 @@ class TicketResource(Resource):
     def post(self):
         data = parser.parse_args()
 
-        # for a single event, we cannot have the same ticket name within the same event
+        # for a single event, we cannot have the same ticket name
         # so we add a check for that using both the name and event id
         exists = Ticket.query.filter_by(
             name=data["name"], event_id=data["event_id"]
